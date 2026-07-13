@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${thread.title + ' — MyBaseCamp'}">Thread</title>
+  <link rel="stylesheet" href="/css/show.css">
+</head>
+<body>
+<nav>
+  <div class="nav-left">
+    <a href="/dashboard" class="logo">MyBaseCamp</a>
+    <span class="nav-sep">/</span>
+    <span class="nav-current" th:text="${thread.title}">Thread</span>
+  </div>
+  <form th:action="@{/sessions}" method="POST" style="display:inline">
+    <input type="hidden" name="_method" value="DELETE">
+    <button type="submit" class="btn-logout">Logout</button>
+  </form>
+</nav>
+
+<div class="page-wrap">
+  <div class="thread-header">
+    <h1 class="thread-title-big" th:text="${thread.title}">Thread</h1>
+    <p class="thread-meta-big">
+      Started by <strong th:text="${thread.author != null ? thread.author.name : 'Unknown'}">Unknown</strong>
+    </p>
+  </div>
+
+  <div class="messages" id="messageList">
+    <p class="empty-msg" id="emptyMessages" th:if="${thread.messages == null or thread.messages.isEmpty()}">No messages yet. Be the first to write!</p>
+    <div class="message-card" th:each="m : ${thread.messages}" th:id="'msg-' + ${m.id}">
+      <div class="msg-avatar">
+        <span th:text="${m.author != null and m.author.name != null and !m.author.name.isEmpty() ? m.author.name.substring(0,1).toUpperCase() : '?'}">?</span>
+      </div>
+      <div class="msg-body">
+        <div class="msg-meta">
+          <strong class="msg-author" th:text="${m.author != null ? m.author.name : 'Unknown'}">Unknown</strong>
+          <span class="msg-time" th:text="${#temporals.format(m.createdAt, 'yyyy-MM-dd HH:mm')}">2026-01-01 00:00</span>
+          <span class="msg-edited" th:if="${m.updatedAt != null and m.updatedAt != m.createdAt}">(edited)</span>
+        </div>
+
+        <p class="msg-content" th:id="'content-' + ${m.id}" th:text="${m.content}">Message</p>
+
+        <form th:action="@{/projects/{projectId}/threads/{threadId}/messages/{messageId}(projectId=${project.id}, threadId=${thread.id}, messageId=${m.id})}" method="POST" class="edit-msg-form hidden" th:id="'edit-form-' + ${m.id}">
+          <input type="hidden" name="_method" value="PUT">
+          <textarea name="content" class="msg-textarea" rows="3" th:text="${m.content}"></textarea>
+          <div class="edit-actions">
+            <button type="button" class="btn-secondary btn-sm" th:onclick="'cancelEdit(' + ${m.id} + ')'">Cancel</button>
+            <button type="submit" class="btn-primary btn-sm">Save</button>
+          </div>
+        </form>
+
+        <div class="msg-actions" th:id="'actions-' + ${m.id}" th:if="${user != null and (m.authorId == user.id or isAdmin)}">
+          <button class="btn-link" th:onclick="'startEdit(' + ${m.id} + ')'">Edit</button>
+          <form th:action="@{/projects/{projectId}/threads/{threadId}/messages/{messageId}(projectId=${project.id}, threadId=${thread.id}, messageId=${m.id})}" method="POST" style="display:inline" th:onsubmit="return confirm('Delete this message?')">
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit" class="btn-link danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="new-message-box">
+    <div class="msg-avatar self">
+      <span th:text="${user != null and user.name != null and !user.name.isEmpty() ? user.name.substring(0,1).toUpperCase() : '?'}">?</span>
+    </div>
+    <form th:action="@{/projects/{projectId}/threads/{threadId}/messages(projectId=${project.id}, threadId=${thread.id})}" method="POST" class="new-msg-form" id="newMsgForm">
+      <textarea name="content" id="msgContent" class="msg-textarea" rows="3" placeholder="Write a message…" required th:text="${param.content}"></textarea>
+      <div class="form-actions" style="margin-top:0.5rem">
+        <button type="submit" class="btn-primary" id="sendMsgBtn">Send</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function startEdit(id) {
+    document.getElementById('content-' + id).classList.add('hidden');
+    document.getElementById('actions-' + id).classList.add('hidden');
+    document.getElementById('edit-form-' + id).classList.remove('hidden');
+  }
+  function cancelEdit(id) {
+    document.getElementById('content-' + id).classList.remove('hidden');
+    document.getElementById('actions-' + id).classList.remove('hidden');
+    document.getElementById('edit-form-' + id).classList.add('hidden');
+  }
+</script>
+<script src="/js/show.js"></script>
+</body>
+</html>

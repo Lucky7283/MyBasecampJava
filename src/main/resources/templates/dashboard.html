@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — MyBaseCamp</title>
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <nav>
+    <a href="/dashboard" class="logo">MyBaseCamp</a>
+    <div class="nav-right">
+      <a href="/admin" class="badge-admin" th:if="${result.isAdmin}">Admin</a>
+      <span class="badge-user" th:unless="${result.isAdmin}">User</span>
+      <div class="user-info">
+        <div class="avatar" th:text="${result.avatar}"></div>
+        <span class="user-name" th:text="${result.userName}"></span>
+      </div>
+      <form action="/sessions" method="POST" style="display:inline">
+        <input type="hidden" name="_method" value="DELETE">
+        <button type="submit" class="btn-logout">Logout</button>
+      </form>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="alert" id="alertMsg"></div>
+
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Hello, <span th:text="${result.userName}"></span>! 👋</h1>
+        <p class="page-subtitle" th:text="${result.userEmail}"></p>
+      </div>
+      <a href="/projects/new" class="btn-primary">+ New project</a>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <p class="stat-label">Projects</p>
+        <p class="stat-value" id="statProjects" th:text="${result.projectsCount}">0</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Users</p>
+        <p class="stat-value" th:class="'blue'" th:text="${result.usersCount}">0</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Your role</p>
+        <p class="stat-value" th:class="'green'" th:text="${result.userRole}">user</p>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <a href="/projects" class="section-title">Projects</a>
+      <span class="count-badge" id="projectCount" th:text="${#lists.size(projects)} + ' projects'">0 projects</span>
+    </div>
+
+    <div class="projects-list" id="projectsList">
+      <div class="project-card" th:each="project, iter : ${projects}" th:data-id="${project.id}">
+        <div class="project-info">
+          <p class="project-name" th:text="${project.name}">Project</p>
+          <p class="project-meta">Created: <span th:text="${#temporals.format(project.createdAt, 'dd MMM yyyy')}"></span> · Owner: <span th:text="${project.ownerId == result.userId ? 'You' : 'User ' + project.ownerId}"></span></p>
+        </div>
+        <div class="project-actions">
+          <a th:href="'/projects/' + ${project.id} + '/show'" class="btn-view">View</a>
+          <a th:href="'/projects/' + ${project.id} + '/edit'" class="btn-edit">Edit</a>
+          <button class="btn-delete" th:data-id="${project.id}" th:data-name="${project.name}">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" id="emptyState" th:style="'display: ' + (${#lists.size(projects) == 0} ? 'block' : 'none') + ';'">
+      <div class="empty-icon">📂</div>
+      <p class="empty-title">No projects yet</p>
+      <p class="empty-text">Start by creating a new project</p>
+    </div>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

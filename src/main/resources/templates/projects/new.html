@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Project — MyBaseCamp</title>
+  <link rel="stylesheet" href="/css/projects.css">
+</head>
+<body>
+  <nav>
+    <div class="nav-left">
+      <a href="/dashboard" class="logo">MyBaseCamp</a>
+      <span class="nav-sep">/</span>
+      <span class="nav-current">New project</span>
+    </div>
+    <form action="/sessions" method="POST" style="display:inline">
+      <input type="hidden" name="_method" value="DELETE">
+      <button type="submit" class="btn-logout">Logout</button>
+    </form>
+  </nav>
+
+  <div class="page-center">
+    <div class="content-wrapper">
+      <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+
+      <h1 class="page-title">Create new project</h1>
+      <p class="page-subtitle">Enter project details</p>
+
+      <div th:if="${error != null}" style="background-color: rgba(216, 58, 82, 0.08); color: var(--brick-dark); border: 1px solid rgba(216, 58, 82, 0.25); border-radius: 6px; padding: 12px; margin-bottom: 20px; font-size: 14px;">
+        <span th:text="${error}"></span>
+      </div>
+
+      <div class="form-card">
+        <p class="form-section-title">Project information</p>
+
+        <form action="/projects" method="POST">
+          <div class="form-group">
+            <label for="projectName" class="required">Project name</label>
+            <input type="text" id="projectName" name="name" placeholder="e.g. New website" required maxlength="100">
+            <p class="form-hint">Up to 100 characters</p>
+          </div>
+          <div class="form-group">
+            <label for="projectDesc">Description</label>
+            <textarea id="projectDesc" name="description" placeholder="Short description about the project..." maxlength="500"></textarea>
+          </div>
+          <div class="form-actions">
+            <a href="/dashboard" class="btn-cancel">Cancel</a>
+            <button type="submit" class="btn-submit">Create project</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

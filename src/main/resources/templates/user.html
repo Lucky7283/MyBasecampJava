@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User — MyBaseCamp</title>
+  <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+  <nav>
+    <a href="/dashboard" class="logo">MyBaseCamp</a>
+  </nav>
+  <div class="main">
+    <h1 th:text="${user.name}"></h1>
+    <p th:text="${user.email}"></p>
+    <a href="/dashboard">Back</a>
+  </div>
+</body>
+</html>

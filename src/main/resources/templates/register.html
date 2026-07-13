@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign up — MyBaseCamp</title>
+  <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="logo">MyBaseCamp</a>
+    <a href="/login" class="nav-link">Already have an account? Log in →</a>
+  </nav>
+
+  <div class="page-center">
+    <div class="card">
+      <h1 class="card-title">Create an account</h1>
+      <p class="card-subtitle">Welcome to MyBaseCamp</p>
+
+      <form action="/users" method="POST" id="registerForm">
+        <div class="form-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" placeholder="Mahammad" required>
+          <div class="error-text" id="fullname-error"></div>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="mahammad@example.com" required>
+          <div class="error-text" id="email-error"></div>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="At least 6 characters" required minlength="6">
+          <div class="strength-wrapper">
+            <div class="strength-bar-bg">
+              <div class="strength-bar" id="strengthBar"></div>
+            </div>
+            <div class="strength-text" id="strengthText"></div>
+          </div>
+          <div class="error-text" id="password-error"></div>
+        </div>
+        <div class="form-group">
+          <label for="password_confirm">Password confirmation</label>
+          <input type="password" id="password_confirm" name="password_confirm" placeholder="Password confirmation" required>
+          <div class="error-text" id="confirm-error"></div>
+        </div>
+        <div th:if="${error != null}" class="alert-error" style="margin-top:1rem">
+          <span th:text="${error}"></span>
+        </div>
+        <button type="submit" class="btn-submit" id="submitBtn" style="margin-top:1rem">Sign Up</button>
+      </form>
+
+      <div class="form-footer">Already a member? <a href="/login">Log in</a></div>
+    </div>
+  </div>
+
+  <script src="/js/register.js"></script>
+</body>
+</html>
