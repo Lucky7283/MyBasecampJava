@@ -51,4 +51,7 @@ public class Thread {
     @OneToMany(mappedBy = "thread", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("createdAt ASC")
     private List<Message> messages;
+
+    @OneToMany(mappedBy = "thread",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private List<ThreadsMember> members;
 }

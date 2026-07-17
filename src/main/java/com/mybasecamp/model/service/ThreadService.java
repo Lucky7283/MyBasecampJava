@@ -1,8 +1,14 @@
 package com.mybasecamp.model.service;
 
+import com.mybasecamp.ExceptionHandler.AlreadyExistException;
 import com.mybasecamp.model.entity.Thread;
+import com.mybasecamp.model.entity.ThreadsMember;
+import com.mybasecamp.model.entity.User;
 import com.mybasecamp.model.repository.ThreadRepository;
+import com.mybasecamp.model.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -11,13 +17,12 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class ThreadService {
 
     private final ThreadRepository threadRepository;
+    private final UserRepository userRepository;
 
-    public ThreadService(ThreadRepository threadRepository) {
-        this.threadRepository = threadRepository;
-    }
 
     public Map<String, Object> createThreadService(Integer projectId, String title, Integer createdBy) {
         Map<String, Object> result = new HashMap<>();
@@ -116,5 +121,29 @@ public class ThreadService {
             result.put("message", err.getMessage());
         }
         return result;
+    }
+
+    public boolean addNewMemberToThread(Integer memberId, Integer threadId) {
+        Thread thread = threadRepository.findById(threadId)
+                .orElseThrow(() -> new EntityNotFoundException("Thread not found"));
+        User user = userRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        boolean isPresent = thread.getMembers() != null && thread.getMembers().stream()
+                .anyMatch(member -> member.getUsers() != null && member.getUsers().getId().equals(memberId));
+        if (isPresent) {
+            throw new AlreadyExistException("User already exist inside thread");
+        }
+
+        ThreadsMember threadsMember = new ThreadsMember();
+        threadsMember.setThread(thread);
+        threadsMember.setUsers(user);
+
+        if (thread.getMembers() == null) {
+            thread.setMembers(new java.util.ArrayList<>());
+        }
+        thread.getMembers().add(threadsMember);
+        threadRepository.save(thread);
+        return true;
     }
 }
