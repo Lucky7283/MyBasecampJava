@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,16 +35,14 @@ public class AppController {
     private final ThreadService threadService;
     private final MessageService messageService;
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/src/main/resources/uploads";
-    private final SessionService sessionService;
 
     public AppController(UserService userService, ProjectService projectService, AttachmentService attachmentService,
-                         ThreadService threadService, MessageService messageService, SessionService sessionService) {
+            ThreadService threadService, MessageService messageService) {
         this.userService = userService;
         this.projectService = projectService;
         this.attachmentService = attachmentService;
         this.threadService = threadService;
         this.messageService = messageService;
-        this.sessionService = sessionService;
     }
 
     @GetMapping("/")
@@ -88,7 +85,7 @@ public class AppController {
 
     @GetMapping("/login")
     public String login(@RequestParam(required = false) String error, @RequestParam(required = false) String email,
-                        Model model) {
+            Model model) {
         model.addAttribute("error", error);
         model.addAttribute("email", email != null ? email : "");
         return "login";
@@ -125,10 +122,10 @@ public class AppController {
 
     @PostMapping("/users")
     public String createUser(@RequestParam String name,
-                             @RequestParam String email,
-                             @RequestParam String password,
-                             @RequestParam("password_confirm") String passwordConfirm,
-                             Model model) {
+            @RequestParam String email,
+            @RequestParam String password,
+            @RequestParam("password_confirm") String passwordConfirm,
+            Model model) {
         Map<String, Object> result = userService.createUser(name, email, password, passwordConfirm);
         if ((Boolean) result.get("success")) {
             return "redirect:/login";
@@ -172,10 +169,10 @@ public class AppController {
 
     @PostMapping("/sessions")
     public String login(@RequestParam String email,
-                        @RequestParam String password,
-                        @RequestParam(required = false) Boolean remember,
-                        HttpServletResponse response,
-                        Model model) {
+            @RequestParam String password,
+            @RequestParam(required = false) Boolean remember,
+            HttpServletResponse response,
+            Model model) {
         Map<String, Object> result = userService.loginUser(email, password, remember);
         if ((Boolean) result.get("success")) {
             Map<String, Object> data = (Map<String, Object>) result.get("data");
@@ -242,7 +239,7 @@ public class AppController {
 
     @PostMapping("/projects")
     public String createProject(@RequestParam String name, @RequestParam(required = false) String description,
-                                HttpServletRequest request) {
+            HttpServletRequest request) {
         User user = (User) request.getAttribute("user");
         String ownerIdParam = request.getParameter("owner_id");
         Integer finalOwnerId = ownerIdParam != null && !ownerIdParam.isBlank() ? Integer.parseInt(ownerIdParam)
@@ -297,7 +294,7 @@ public class AppController {
 
     @PutMapping("/projects/{id}")
     public String updateProject(@PathVariable Integer id, @RequestParam String name,
-                                @RequestParam(required = false) String description, HttpServletRequest request, Model model) {
+            @RequestParam(required = false) String description, HttpServletRequest request, Model model) {
         if (!isOwnerOrAdmin(request, id)) {
             return "error";
         }
@@ -334,14 +331,9 @@ public class AppController {
 
     @PostMapping(value = "/projects/{projectId}/attachments", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public String createAttachment(@PathVariable Integer projectId, @RequestParam("file") MultipartFile file,
-                                   HttpServletRequest request) throws IOException {
-        User user = (User) request.getAttribute("user");
+            HttpServletRequest request) throws IOException {
         Map<String, Object> projectResult = projectService.getProjectService(projectId);
         if (!(Boolean) projectResult.get("success")) {
-            return "error";
-        }
-        Project project = (Project) projectResult.get("data");
-        if (!project.getOwnerId().equals(user.getId())) {
             return "error";
         }
 
@@ -367,7 +359,7 @@ public class AppController {
 
     @DeleteMapping("/projects/{projectId}/attachments/{attachmentId}")
     public String deleteAttachment(@PathVariable Integer projectId, @PathVariable Integer attachmentId,
-                                   HttpServletRequest request) throws IOException {
+            HttpServletRequest request) throws IOException {
         User user = (User) request.getAttribute("user");
         Map<String, Object> projectResult = projectService.getProjectService(projectId);
         if (!(Boolean) projectResult.get("success")) {
@@ -392,7 +384,8 @@ public class AppController {
     }
 
     @GetMapping("/uploads/{filename}")
-    public ResponseEntity<Resource> showAttachment(@PathVariable String filename, HttpServletRequest request) throws FileNotFoundException {
+    public ResponseEntity<Resource> showAttachment(@PathVariable String filename, HttpServletRequest request)
+            throws FileNotFoundException {
         File file = new File(UPLOAD_DIR, filename);
         Resource resource = new FileSystemResource(file);
         if (!file.exists()) {
@@ -400,7 +393,6 @@ public class AppController {
         }
 
         return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
-
 
     }
 
@@ -422,7 +414,7 @@ public class AppController {
 
     @PostMapping("/projects/{projectId}/threads")
     public String createThread(@PathVariable Integer projectId, @RequestParam String title, HttpServletRequest request,
-                               Model model) {
+            Model model) {
         User user = (User) request.getAttribute("user");
         Map<String, Object> projectResult = projectService.getProjectService(projectId);
         if (!(Boolean) projectResult.get("success")) {
@@ -451,7 +443,7 @@ public class AppController {
 
     @GetMapping("/projects/{projectId}/threads/{threadId}/edit")
     public String editThread(@PathVariable Integer projectId, @PathVariable Integer threadId,
-                             HttpServletRequest request, Model model) {
+            HttpServletRequest request, Model model) {
         User user = (User) request.getAttribute("user");
         Map<String, Object> projectResult = projectService.getProjectService(projectId);
         if (!(Boolean) projectResult.get("success")) {
@@ -474,7 +466,7 @@ public class AppController {
 
     @PutMapping("/projects/{projectId}/threads/{threadId}")
     public String updateThread(@PathVariable Integer projectId, @PathVariable Integer threadId,
-                               @RequestParam String title, HttpServletRequest request, Model model) {
+            @RequestParam String title, HttpServletRequest request, Model model) {
         User user = (User) request.getAttribute("user");
         Map<String, Object> projectResult = projectService.getProjectService(projectId);
         if (!(Boolean) projectResult.get("success")) {
@@ -499,7 +491,7 @@ public class AppController {
 
     @DeleteMapping("/projects/{projectId}/threads/{threadId}")
     public String deleteThread(@PathVariable Integer projectId, @PathVariable Integer threadId,
-                               HttpServletRequest request) {
+            HttpServletRequest request) {
         User user = (User) request.getAttribute("user");
         Map<String, Object> projectResult = projectService.getProjectService(projectId);
         if (!(Boolean) projectResult.get("success")) {
@@ -515,7 +507,7 @@ public class AppController {
 
     @GetMapping("/projects/{projectId}/threads/{threadId}")
     public String showThread(@PathVariable Integer projectId, @PathVariable Integer threadId,
-                             HttpServletRequest request, Model model) {
+            HttpServletRequest request, Model model) {
         User user = (User) request.getAttribute("user");
         Map<String, Object> threadResult = threadService.getThreadService(threadId);
         if (!(Boolean) threadResult.get("success")) {
@@ -534,14 +526,10 @@ public class AppController {
 
     @PostMapping("/projects/{projectId}/threads/{threadId}/messages")
     public String createMessage(@PathVariable Integer projectId, @PathVariable Integer threadId,
-                                @RequestParam String content, HttpServletRequest request) {
+            @RequestParam String content, HttpServletRequest request) {
         User user = (User) request.getAttribute("user");
         Map<String, Object> projectResult = projectService.getProjectService(projectId);
         if (!(Boolean) projectResult.get("success")) {
-            return "error";
-        }
-        Project project = (Project) projectResult.get("data");
-        if (!project.getOwnerId().equals(user.getId())) {
             return "error";
         }
 
@@ -554,7 +542,7 @@ public class AppController {
 
     @PutMapping("/projects/{projectId}/threads/{threadId}/messages/{messageId}")
     public String updateMessage(@PathVariable Integer projectId, @PathVariable Integer threadId,
-                                @PathVariable Integer messageId, @RequestParam String content, HttpServletRequest request) {
+            @PathVariable Integer messageId, @RequestParam String content, HttpServletRequest request) {
         User user = (User) request.getAttribute("user");
         Map<String, Object> messageResult = messageService.getMessageService(messageId);
         if (!(Boolean) messageResult.get("success")) {
@@ -579,7 +567,7 @@ public class AppController {
 
     @DeleteMapping("/projects/{projectId}/threads/{threadId}/messages/{messageId}")
     public String deleteMessage(@PathVariable Integer projectId, @PathVariable Integer threadId,
-                                @PathVariable Integer messageId, HttpServletRequest request) {
+            @PathVariable Integer messageId, HttpServletRequest request) {
         User user = (User) request.getAttribute("user");
         Map<String, Object> messageResult = messageService.getMessageService(messageId);
         if (!(Boolean) messageResult.get("success")) {
@@ -596,5 +584,20 @@ public class AppController {
         }
         messageService.deleteMessageService(messageId);
         return "redirect:/projects/" + projectId + "/threads/" + threadId;
+    }
+
+    @PostMapping("/add/{id}")
+    public String addNewMember(@PathVariable Integer id, @RequestParam Integer memberId, HttpServletRequest request) {
+        Map<String, Object> threadResult = threadService.getThreadService(id);
+        if (!(Boolean) threadResult.get("success")) {
+            return "error";
+        }
+        com.mybasecamp.model.entity.Thread thread = (com.mybasecamp.model.entity.Thread) threadResult.get("data");
+        try {
+            threadService.addNewMemberToThread(memberId, id);
+            return "redirect:/projects/" + thread.getProjectId() + "/threads/" + id;
+        } catch (Exception e) {
+            return "redirect:/projects/" + thread.getProjectId() + "/threads/" + id + "?error=" + e.getMessage();
+        }
     }
 }
