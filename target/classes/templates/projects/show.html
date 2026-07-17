@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${project.name} + ' — MyBaseCamp'">Project</title>
+  <link rel="stylesheet" href="/css/show.css">
+</head>
+<body>
+
+<nav>
+  <div class="nav-left">
+    <a href="/dashboard" class="logo">MyBaseCamp</a>
+    <span class="nav-sep">/</span>
+    <span class="nav-current" th:text="${project.name}">Project</span>
+  </div>
+  <form th:action="@{/sessions}" method="POST" style="display:inline">
+    <input type="hidden" name="_method" value="DELETE">
+    <button type="submit" class="btn-logout">Logout</button>
+  </form>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="project-header">
+    <div>
+      <h1 class="proj-title" th:text="${project.name}">Project</h1>
+      <p class="proj-desc" th:text="${project.description != null ? project.description : 'No description provided.'}">No description</p>
+    </div>
+    <div class="header-actions" th:if="${isAdmin}">
+      <a th:href="@{/projects/{id}/edit(id=${project.id})}" class="btn-secondary">Edit project</a>
+    </div>
+  </div>
+
+  <div th:if="${error == 'no_file'}" class="flash flash-error">Please select a file before uploading.</div>
+  <div th:if="${error == 'empty'}" class="flash flash-error">Message cannot be empty.</div>
+
+  <section class="section" id="attachments">
+    <div class="section-header">
+      <h2 class="section-title">📎 Attachments</h2>
+    </div>
+
+    <form th:action="@{/projects/{id}/attachments(id=${project.id})}" method="POST" enctype="multipart/form-data" class="upload-form" id="uploadForm">
+      <label class="file-label" for="fileInput">Choose file</label>
+      <input type="file" id="fileInput" name="file" accept=".png,.jpg,.jpeg,.gif,.pdf,.txt,.doc,.docx">
+      <span class="file-chosen" id="fileChosen">No file chosen</span>
+      <button type="submit" class="btn-primary" id="uploadBtn">Upload</button>
+    </form>
+
+    <p class="empty-msg" th:if="${#lists.size(attachments) == 0}">No attachments yet.</p>
+    <ul class="attachment-list" th:unless="${#lists.size(attachments) == 0}">
+      <li class="attachment-item" th:each="a : ${attachments}">
+        <span class="att-icon" th:text="${a.mimeType.startsWith('image') ? '🖼️' : (a.mimeType == 'application/pdf' ? '📄' : '📁')}">📁</span>
+        <div class="att-info">
+          <a th:href="@{/uploads/{filename}(filename=${a.filename})}" class="att-name" target="_blank" rel="noopener" th:text="${a.original}">File</a>
+          <span class="att-meta" th:text="${a.mimeType} + ' · ' + (${a.size != null ? #numbers.formatDecimal(a.size / 1024.0, 1, 2) + ' KB' : '0 KB'})">0 KB</span>
+        </div>
+        <form th:action="@{/projects/{projectId}/attachments/{attachmentId}(projectId=${project.id}, attachmentId=${a.id})}" method="POST" class="att-delete-form" style="display:inline">
+          <input type="hidden" name="_method" value="DELETE">
+          <button type="submit" class="btn-icon-delete" title="Delete">✕</button>
+        </form>
+      </li>
+    </ul>
+  </section>
+
+  <section class="section" id="threads">
+    <div class="section-header">
+      <h2 class="section-title">💬 Threads</h2>
+      <a th:if="${isAdmin}" th:href="@{/projects/{id}/threads/new(id=${project.id})}" class="btn-primary" id="newThreadBtn">+ New thread</a>
+    </div>
+
+    <p class="empty-msg" th:if="${#lists.size(threads) == 0}">No threads yet<span th:if="${isAdmin}">. Start a discussion!</span>.</p>
+    <ul class="thread-list" th:unless="${#lists.size(threads) == 0}">
+      <li class="thread-item" th:each="t : ${threads}">
+        <a th:href="@{/projects/{projectId}/threads/{threadId}(projectId=${project.id}, threadId=${t.id})}" class="thread-link">
+          <span class="thread-icon">💬</span>
+          <div class="thread-info">
+            <span class="thread-title" th:text="${t.title}">Thread</span>
+            <span class="thread-meta">by <span th:text="${t.author != null ? t.author.name : 'Unknown'}">Unknown</span> · <span th:text="${#temporals.format(t.createdAt, 'dd MMM yyyy')}">1 Jan 2026</span></span>
+          </div>
+        </a>
+        <div class="thread-actions" th:if="${isAdmin}">
+          <a th:href="@{/projects/{projectId}/threads/{threadId}/edit(projectId=${project.id}, threadId=${t.id})}" class="btn-icon-edit" title="Edit">✏️</a>
+          <form th:action="@{/projects/{projectId}/threads/{threadId}(projectId=${project.id}, threadId=${t.id})}" method="POST" class="inline-form" style="display:inline" th:onsubmit="return confirm('Delete this thread and all its messages?')">
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit" class="btn-icon-delete" title="Delete">✕</button>
+          </form>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+</div>
+
+<script src="/js/show.js"></script>
+</body>
+</html>

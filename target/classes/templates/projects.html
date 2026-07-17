@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projects — MyBaseCamp</title>
+  <link rel="stylesheet" href="/css/projects.css">
+</head>
+<body>
+  <nav>
+    <div class="nav-left">
+      <a href="/dashboard" class="logo">MyBaseCamp</a>
+      <span class="nav-sep">/</span>
+      <span class="nav-current" id="navCurrent">Projects</span>
+    </div>
+    <form action="/sessions" method="POST" style="display:inline">
+      <input type="hidden" name="_method" value="DELETE">
+      <button type="submit" class="btn-logout">Logout</button>
+    </form>
+  </nav>
+
+  <div class="page-center">
+    <div class="content-wrapper">
+      <a href="/dashboard" class="back-link">← Back to Dashboard</a>
+
+      <div th:if="${project != null}">
+        <h1 class="page-title" id="pageTitle" th:text="${project.name}">Project</h1>
+        <p class="page-subtitle" id="pageSubtitle" th:text="${project.description}">Description</p>
+
+        <div class="form-card">
+          <p class="form-section-title">Project information</p>
+          <form action="[[/projects/]]/[[${project.id}]]" method="POST">
+            <input type="hidden" name="_method" value="PUT">
+            <div class="form-group">
+              <label for="projectName" class="required">Project name</label>
+              <input type="text" id="projectName" name="name" th:value="${project.name}" placeholder="e.g. New website" required maxlength="100">
+            </div>
+            <div class="form-group">
+              <label for="projectDesc">Description</label>
+              <textarea id="projectDesc" name="description" placeholder="Short description..." maxlength="500" th:text="${project.description}"></textarea>
+            </div>
+            <div class="form-actions">
+              <a href="/dashboard" class="btn-cancel">Cancel</a>
+              <button type="submit" class="btn-submit">Update project</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div th:unless="${project != null}">
+        <h1 class="page-title">Projects List</h1>
+        <div class="projects-list" th:if="${projects != null and #lists.size(projects) > 0}">
+          <div class="project-card" th:each="p : ${projects}" style="background:#fff;border:1px solid #eaeaea;padding:1.5rem;margin-bottom:1rem;border-radius:8px">
+            <h3 style="margin-top:0;margin-bottom:0.5rem" th:text="${p.name}">Project</h3>
+            <p style="color:#666;margin-bottom:1rem" th:text="${p.description != null ? p.description : 'No description'}">No description</p>
+            <a th:href="'/projects/' + ${p.id} + '/edit'" class="btn-edit" style="color:#007bff;text-decoration:none;font-weight:500">Edit</a>
+          </div>
+        </div>
+        <p th:unless="${projects != null and #lists.size(projects) > 0}">No projects found.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/projects.js"></script>
+</body>
+</html>

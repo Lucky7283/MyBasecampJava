@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title th:text="${thread.title + ' — MyBaseCamp'}">Thread</title>
+  <link rel="stylesheet" href="/css/show.css">
+</head>
+<body>
+<nav>
+  <div class="nav-left">
+    <a href="/dashboard" class="logo">MyBaseCamp</a>
+    <span class="nav-sep">/</span>
+    <span class="nav-current" th:text="${thread.title}">Thread</span>
+  </div>
+  <form th:action="@{/sessions}" method="POST" style="display:inline">
+    <input type="hidden" name="_method" value="DELETE">
+    <button type="submit" class="btn-logout">Logout</button>
+  </form>
+</nav>
+
+<div class="page-wrap">
+  <div th:if="${param.error != null}" class="flash flash-error" th:text="${param.error}">Error message</div>
+
+  <div class="thread-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+    <div>
+      <h1 class="thread-title-big" th:text="${thread.title}">Thread</h1>
+      <p class="thread-meta-big">
+        Started by <strong th:text="${thread.author != null ? thread.author.name : 'Unknown'}">Unknown</strong>
+      </p>
+      <p class="thread-meta-big" style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap;">
+        <span style="color: var(--muted);">Members:</span>
+        <span th:each="m, iter : ${thread.members}" style="background: var(--surface2); border: 1px solid var(--border); padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.8rem; color: var(--text);">
+          <span th:text="${m.users != null ? m.users.name : 'Unknown'}">Name</span>
+        </span>
+        <span th:if="${thread.members == null or thread.members.isEmpty()}" style="font-style: italic; color: var(--muted); font-size: 0.8rem;">No members added yet.</span>
+      </p>
+    </div>
+
+    <div th:if="${isAdmin}" class="add-member-container" style="position: relative;">
+      <button type="button" class="btn-secondary" id="toggleAddMemberBtn" onclick="toggleAddMember()">
+        <span>👤 Add Member</span>
+      </button>
+      <div id="addMemberFormContainer" class="hidden" style="position: absolute; right: 0; top: 45px; background: var(--surface2); border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius); width: 260px; z-index: 10; box-shadow: var(--shadow);">
+        <form th:action="@{/add/{id}(id=${thread.id})}" method="POST">
+          <div style="margin-bottom: 0.75rem;">
+            <label for="memberIdInput" style="display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.35rem; font-weight: 500;">User ID</label>
+            <input type="number" id="memberIdInput" name="memberId" placeholder="Enter User ID" required
+                   style="width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.45rem 0.65rem; border-radius: 6px; font-size: 0.85rem; outline: none; transition: border-color 0.2s;"
+                   onfocus="this.style.borderColor='var(--accent)'"
+                   onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+            <button type="button" class="btn-secondary btn-sm" onclick="toggleAddMember()">Cancel</button>
+            <button type="submit" class="btn-primary btn-sm">Add</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="messages" id="messageList">
+    <p class="empty-msg" id="emptyMessages" th:if="${thread.messages == null or thread.messages.isEmpty()}">No messages yet. Be the first to write!</p>
+    <div class="message-card" th:each="m : ${thread.messages}" th:id="'msg-' + ${m.id}">
+      <div class="msg-avatar">
+        <span th:text="${m.author != null and m.author.name != null and !m.author.name.isEmpty() ? m.author.name.substring(0,1).toUpperCase() : '?'}">?</span>
+      </div>
+      <div class="msg-body">
+        <div class="msg-meta">
+          <strong class="msg-author" th:text="${m.author != null ? m.author.name : 'Unknown'}">Unknown</strong>
+          <span class="msg-time" th:text="${#temporals.format(m.createdAt, 'yyyy-MM-dd HH:mm')}">2026-01-01 00:00</span>
+          <span class="msg-edited" th:if="${m.updatedAt != null and m.updatedAt != m.createdAt}">(edited)</span>
+        </div>
+
+        <p class="msg-content" th:id="'content-' + ${m.id}" th:text="${m.content}">Message</p>
+
+        <form th:action="@{/projects/{projectId}/threads/{threadId}/messages/{messageId}(projectId=${project.id}, threadId=${thread.id}, messageId=${m.id})}" method="POST" class="edit-msg-form hidden" th:id="'edit-form-' + ${m.id}">
+          <input type="hidden" name="_method" value="PUT">
+          <textarea name="content" class="msg-textarea" rows="3" th:text="${m.content}"></textarea>
+          <div class="edit-actions">
+            <button type="button" class="btn-secondary btn-sm" th:onclick="'cancelEdit(' + ${m.id} + ')'">Cancel</button>
+            <button type="submit" class="btn-primary btn-sm">Save</button>
+          </div>
+        </form>
+
+        <div class="msg-actions" th:id="'actions-' + ${m.id}" th:if="${user != null and (m.authorId == user.id or isAdmin)}">
+          <button class="btn-link" th:onclick="'startEdit(' + ${m.id} + ')'">Edit</button>
+          <form th:action="@{/projects/{projectId}/threads/{threadId}/messages/{messageId}(projectId=${project.id}, threadId=${thread.id}, messageId=${m.id})}" method="POST" style="display:inline" th:onsubmit="return confirm('Delete this message?')">
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit" class="btn-link danger">Delete</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="new-message-box">
+    <div class="msg-avatar self">
+      <span th:text="${user != null and user.name != null and !user.name.isEmpty() ? user.name.substring(0,1).toUpperCase() : '?'}">?</span>
+    </div>
+    <form th:action="@{/projects/{projectId}/threads/{threadId}/messages(projectId=${project.id}, threadId=${thread.id})}" method="POST" class="new-msg-form" id="newMsgForm">
+      <textarea name="content" id="msgContent" class="msg-textarea" rows="3" placeholder="Write a message…" required th:text="${param.content}"></textarea>
+      <div class="form-actions" style="margin-top:0.5rem">
+        <button type="submit" class="btn-primary" id="sendMsgBtn">Send</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function startEdit(id) {
+    document.getElementById('content-' + id).classList.add('hidden');
+    document.getElementById('actions-' + id).classList.add('hidden');
+    document.getElementById('edit-form-' + id).classList.remove('hidden');
+  }
+  function cancelEdit(id) {
+    document.getElementById('content-' + id).classList.remove('hidden');
+    document.getElementById('actions-' + id).classList.remove('hidden');
+    document.getElementById('edit-form-' + id).classList.add('hidden');
+  }
+  function toggleAddMember() {
+    var container = document.getElementById('addMemberFormContainer');
+    if (container) {
+      if (container.classList.contains('hidden')) {
+        container.classList.remove('hidden');
+        var input = document.getElementById('memberIdInput');
+        if (input) input.focus();
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+  }
+</script>
+<script src="/js/show.js"></script>
+</body>
+</html>

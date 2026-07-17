@@ -1,0 +1,195 @@
+:root {
+  --hampton:    #E5CFA8;
+  --brick:      #D83A52;
+  --brick-dark: #B02C41;
+  --cream:      #FDF6EC;
+  --dark:       #2C1A1D;
+  --mid:        #7A5C62;
+  --faint:      #C4A882;
+  --border:     #EAD9C0;
+  --card-bg:    #FFFBF5;
+  --input-bg:   #FDF8F0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background-color: var(--cream);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+nav {
+  background-color: var(--card-bg);
+  height: 56px;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--brick);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.logo:hover { color: var(--brick-dark); }
+
+.nav-link { font-size: 14px; color: var(--mid); text-decoration: none; transition: color 0.2s; }
+.nav-link:hover { color: var(--brick); }
+
+.page-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+.card {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.card-title { font-size: 24px; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
+.card-subtitle { font-size: 14px; color: var(--mid); margin-bottom: 28px; }
+
+.alert-error {
+  background-color: rgba(216, 58, 82, 0.08);
+  color: var(--brick-dark);
+  border: 1px solid rgba(216, 58, 82, 0.3);
+  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  display: none;
+}
+
+.alert-error.show { display: block; }
+
+.form-group { margin-bottom: 20px; }
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mid);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.label-row label { margin-bottom: 0; }
+
+.forgot-link { font-size: 12px; color: var(--brick); text-decoration: none; }
+.forgot-link:hover { text-decoration: underline; color: var(--brick-dark); }
+
+.input-wrapper { position: relative; }
+
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--dark);
+  background-color: var(--input-bg);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-wrapper input { padding-right: 90px; }
+
+input:focus {
+  border-color: var(--brick);
+  background-color: var(--card-bg);
+  box-shadow: 0 0 0 3px rgba(216, 58, 82, 0.12);
+}
+
+input.error { border-color: var(--brick-dark); }
+
+.toggle-pass {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--mid);
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.toggle-pass:hover { color: var(--brick); }
+
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.remember-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--brick);
+}
+
+.remember-row label {
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--mid);
+  cursor: pointer;
+  font-weight: 400;
+  margin-bottom: 0;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--brick);
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.btn-submit:hover {
+  background-color: var(--brick-dark);
+  box-shadow: 0 6px 18px rgba(216, 58, 82, 0.3);
+}
+
+.btn-submit:active   { transform: scale(0.99); }
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.form-footer { text-align: center; margin-top: 20px; font-size: 14px; color: var(--mid); }
+.form-footer a { color: var(--brick); text-decoration: none; font-weight: 500; }
+.form-footer a:hover { text-decoration: underline; color: var(--brick-dark); }
+
+@media (max-width: 480px) {
+  .card { padding: 28px 20px; }
+}

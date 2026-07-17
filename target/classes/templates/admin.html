@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel — MyBaseCamp</title>
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+<nav>
+    <a href="/dashboard" class="logo">MyBaseCamp</a>
+    <div th:if="${user != null}" class="nav-right">
+        <span class="badge-admin">Admin</span>
+        <div class="avatar"
+             th:text="${user != null and user.name != null and !user.name.isEmpty() ? user.name.charAt(0) : 'U'}">AH
+        </div>
+        <form action="/sessions" method="POST" style="display:inline">
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit" class="btn-logout">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="layout">
+    <aside class="sidebar">
+        <p class="sidebar-title">Navigation</p>
+        <a href="/dashboard" class="sidebar-link">Projects</a>
+        <a href="/admin" class="sidebar-link active">Users</a>
+    </aside>
+
+    <main class="main">
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"
+             style="background-color: #fee2e2; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 20px;">
+            Error message
+        </div>
+
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Manage users</h1>
+                <p class="page-subtitle">Change roles, delete users</p>
+            </div>
+            <span class="admin-tag">⚙ Admin panel</span>
+        </div>
+
+        <div class="summary-bar">
+            <div class="summary-pill">Total: <span th:text="${#lists.size(users ?: {})}">0</span> users</div>
+            <div class="summary-pill">Admin: <span th:text="${adminCount}">0</span></div>
+            <div class="summary-pill">Regular: <span
+                    th:text="${#lists.size(users ?: {}) - adminCount}">0</span></div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="u : ${users ?: {}}" th:data-user-id="${u.id}">
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar" th:classappend="${u.admin ? 'av-green' : 'av-blue'}"
+                                 th:text="${u.name != null and u.name.length() >= 2 ? u.name.substring(0,2).toUpperCase() : (u.name != null and !u.name.isEmpty() ? u.name.toUpperCase() : 'U')}">
+                                NG
+                            </div>
+                            <div>
+                                <p class="user-fullname" th:text="${u.name}">Nurana Guliyeva</p>
+                                <p class="user-date" th:text="${u.email}">nurana_g</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="email-cell" th:text="${u.email}">nurana@example.com</td>
+                    <td>
+                        <span class="role-badge" th:classappend="${u.admin ? 'admin' : 'user'}"
+                              th:text="${u.admin ? 'Admin' : 'User'}">Admin</span>
+                    </td>
+                    <td class="date-cell" th:text="${#temporals.format(u.created_at, 'dd MMM yyyy')}">1 Mar 2026</td>
+
+                    <td class="actions-cell">
+                        <!-- Показываем кнопки ТОЛЬКО если это НЕ сам текущий пользователь -->
+                        <th:block th:if="${user.id != u.id}">
+
+                            <!-- Если u админ → кнопка "Remove admin" -->
+                            <form th:if="${u.admin}" th:action="@{/users/{id}/remove_admin(id=${u.id})}" method="POST"
+                                  style="display:inline">
+                                <button type="submit" class="btn-sm remove-admin">Remove admin</button>
+                            </form>
+
+                            <!-- Если u НЕ админ → кнопка "Make admin" -->
+                            <form th:unless="${u.admin}" th:action="@{/users/{id}/make_admin(id=${u.id})}" method="POST"
+                                  style="display:inline">
+                                <button type="submit" class="btn-sm make-admin">Make admin</button>
+                            </form>
+
+                            <!-- Кнопка Delete -->
+                            <form th:action="@{/users/{id}(id=${u.id})}" method="POST" style="display:inline"
+                                  th:onsubmit="return confirm('Delete user [[${u.name}]]?')">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <button type="submit" class="btn-sm delete-user">Delete</button>
+                            </form>
+
+                        </th:block>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<script src="/js/admin.js"></script>
+</body>
+</html>

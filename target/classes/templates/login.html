@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — MyBaseCamp</title>
+  <link rel="stylesheet" href="/css/login.css">
+</head>
+<body>
+
+  <nav>
+    <a href="/login" class="logo">MyBaseCamp</a>
+    <a href="/register" class="nav-link">Don't have an account? Sign up →</a>
+  </nav>
+
+  <div class="page-center">
+    <div class="card">
+      <h1 class="card-title">Welcome!</h1>
+      <p class="card-subtitle">Log in to your account</p>
+
+      <div class="alert-error" id="alertError" th:if="${error != null}">
+        <span th:text="${error}"></span>
+      </div>
+
+      <form action="/sessions" method="POST" id="loginForm">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="mahammad@example.com" required autocomplete="email" th:value="${email}">
+        </div>
+        <div class="form-group">
+          <div class="label-row">
+            <label for="password">Password</label>
+            <a href="/forgot-password" class="forgot-link">Forgot password?</a>
+          </div>
+          <div class="input-wrapper">
+            <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="toggle-pass" id="togglePassword">👁 Show</button>
+          </div>
+        </div>
+        <div class="remember-row">
+          <input type="checkbox" id="remember" name="remember">
+          <label for="remember">Remember me</label>
+        </div>
+        <button type="submit" class="btn-submit" id="submitBtn">Login</button>
+      </form>
+
+      <div class="form-footer">
+        Don't have an account? <a href="/register">Sign up</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/login.js"></script>
+</body>
+</html>
