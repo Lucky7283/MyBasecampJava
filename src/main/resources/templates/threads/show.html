@@ -19,11 +19,43 @@
 </nav>
 
 <div class="page-wrap">
-  <div class="thread-header">
-    <h1 class="thread-title-big" th:text="${thread.title}">Thread</h1>
-    <p class="thread-meta-big">
-      Started by <strong th:text="${thread.author != null ? thread.author.name : 'Unknown'}">Unknown</strong>
-    </p>
+  <div th:if="${param.error != null}" class="flash flash-error" th:text="${param.error}">Error message</div>
+
+  <div class="thread-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+    <div>
+      <h1 class="thread-title-big" th:text="${thread.title}">Thread</h1>
+      <p class="thread-meta-big">
+        Started by <strong th:text="${thread.author != null ? thread.author.name : 'Unknown'}">Unknown</strong>
+      </p>
+      <p class="thread-meta-big" style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.25rem; flex-wrap: wrap;">
+        <span style="color: var(--muted);">Members:</span>
+        <span th:each="m, iter : ${thread.members}" style="background: var(--surface2); border: 1px solid var(--border); padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.8rem; color: var(--text);">
+          <span th:text="${m.users != null ? m.users.name : 'Unknown'}">Name</span>
+        </span>
+        <span th:if="${thread.members == null or thread.members.isEmpty()}" style="font-style: italic; color: var(--muted); font-size: 0.8rem;">No members added yet.</span>
+      </p>
+    </div>
+
+    <div th:if="${isAdmin}" class="add-member-container" style="position: relative;">
+      <button type="button" class="btn-secondary" id="toggleAddMemberBtn" onclick="toggleAddMember()">
+        <span>👤 Add Member</span>
+      </button>
+      <div id="addMemberFormContainer" class="hidden" style="position: absolute; right: 0; top: 45px; background: var(--surface2); border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius); width: 260px; z-index: 10; box-shadow: var(--shadow);">
+        <form th:action="@{/add/{id}(id=${thread.id})}" method="POST">
+          <div style="margin-bottom: 0.75rem;">
+            <label for="memberIdInput" style="display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.35rem; font-weight: 500;">User ID</label>
+            <input type="number" id="memberIdInput" name="memberId" placeholder="Enter User ID" required
+                   style="width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 0.45rem 0.65rem; border-radius: 6px; font-size: 0.85rem; outline: none; transition: border-color 0.2s;"
+                   onfocus="this.style.borderColor='var(--accent)'"
+                   onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+            <button type="button" class="btn-secondary btn-sm" onclick="toggleAddMember()">Cancel</button>
+            <button type="submit" class="btn-primary btn-sm">Add</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 
   <div class="messages" id="messageList">
@@ -84,6 +116,18 @@
     document.getElementById('content-' + id).classList.remove('hidden');
     document.getElementById('actions-' + id).classList.remove('hidden');
     document.getElementById('edit-form-' + id).classList.add('hidden');
+  }
+  function toggleAddMember() {
+    var container = document.getElementById('addMemberFormContainer');
+    if (container) {
+      if (container.classList.contains('hidden')) {
+        container.classList.remove('hidden');
+        var input = document.getElementById('memberIdInput');
+        if (input) input.focus();
+      } else {
+        container.classList.add('hidden');
+      }
+    }
   }
 </script>
 <script src="/js/show.js"></script>
